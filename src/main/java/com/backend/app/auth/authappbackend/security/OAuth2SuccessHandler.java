@@ -7,7 +7,7 @@ import com.backend.app.auth.authappbackend.repository.RefreshTokenRepository;
 import com.backend.app.auth.authappbackend.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -19,7 +19,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
@@ -27,10 +27,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final RefreshTokenRepository refreshTokenRepository;
     private final CookieService cookieService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Authentication authentication)
+                                         HttpServletResponse response,
+                                         Authentication authentication)
             throws IOException {
 
         if (!(authentication instanceof OAuth2AuthenticationToken token)) {
@@ -92,7 +95,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         if (!user.isEnabled()) {
-            response.sendRedirect("http://localhost:5173/login");
+            response.sendRedirect(frontendUrl + "/login");
             return;
         }
 
@@ -121,7 +124,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         );
 
         response.sendRedirect(
-                "http://localhost:5173/oauth-success"
+                frontendUrl + "/oauth-success"
         );
     }
 }
